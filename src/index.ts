@@ -1,13 +1,18 @@
+import { Command, CommandPlayerMoveLeft, CommandPlayerMoveRight, CommandPlayerMoveUp, CommandPlayerMoveDown } from "./command.js";
+import { Player } from "./player.js";
+
 const canvas = document.querySelector("canvas")
 const ctx = canvas?.getContext("2d")
 
 if (!ctx) throw new Error("No context of canvas")
 let score: number = 0;
+let player: Player  = new Player(50, 250, 250); 
 let playerX = 250;
 let playerY = 250;
 const keyPressed: Record<string, boolean> = {};
+const commandsList: Command[] = [];
 
-const intervalId = setInterval(() => {update(ctx)}, 1000);
+const intervalId = setInterval(() => {update(ctx)}, 200);
 window.addEventListener("keydown", (event: KeyboardEvent) => {keyPressed[event.code] = true});
 window.addEventListener("keyup", (event: KeyboardEvent) => {keyPressed[event.code] = false});
 
@@ -30,21 +35,34 @@ function drawField(context: CanvasRenderingContext2D): void
     context.strokeText(`Score: ${score}`, 400, 20);
 
     context.fillStyle = "red";
-    context.fillRect(playerX, playerY, 10, 10);
+    context.fillRect(player.posX, player.posY, 10, 10);
 }
 
 function handleInput():void
 {
-    if (keyPressed["KeyW"] == true) { playerY -= 50;}
-    if (keyPressed["KeyS"] == true) { playerY += 50;}
-    if (keyPressed["KeyD"] == true) { playerX += 50;}
-    if (keyPressed["KeyA"] == true) { playerX -= 50;}
+    if (keyPressed["KeyA"] == true) { 
+        commandsList.push(new CommandPlayerMoveLeft(player));
+    }
+    if (keyPressed["KeyD"] == true) {
+        commandsList.push(new CommandPlayerMoveRight(player));
+    }
+    if (keyPressed["KeyW"] == true) {
+        commandsList.push(new CommandPlayerMoveUp(player));
+    }
+    if (keyPressed["KeyS"] == true) { 
+        commandsList.push(new CommandPlayerMoveDown(player));
+    }
 }
 
 function update(context: CanvasRenderingContext2D): void
 {
     //addScore();
     handleInput();
+    for (const command of commandsList){
+        command.execute();
+        commandsList.pop();
+    }
+    
     drawField(context);
 }
 
