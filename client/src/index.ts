@@ -1,6 +1,31 @@
 import { Command, CommandPlayerMoveLeft, CommandPlayerMoveRight, CommandPlayerMoveUp, CommandPlayerMoveDown } from "./command.js";
 import { Player } from "./player.js";
 
+const socket = new WebSocket("ws://localhost:5000");
+
+socket.addEventListener("open", (event) => {
+  socket.send("Hello Server!");
+});
+
+// Listen for messages
+socket.addEventListener("message", (event) => {
+  console.log("Message from server:", event.data);
+});
+
+// Handle errors
+socket.addEventListener("error", (event) => {
+  console.error("WebSocket error:", event);
+});
+
+// Handle disconnection
+socket.addEventListener("close", (event) => {
+  if (event.wasClean) {
+    console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
+  } else {
+    console.log("Connection died");
+  }
+});
+
 const canvas = document.querySelector("canvas")
 const ctx = canvas?.getContext("2d")
 
@@ -38,7 +63,7 @@ function drawField(context: CanvasRenderingContext2D): void
     context.fillRect(player.posX, player.posY, 10, 10);
 }
 
-function handleInput():void
+function handleInput(): void
 {
     if (keyPressed["KeyA"] == true) { 
         commandsList.push(new CommandPlayerMoveLeft(player));
@@ -52,6 +77,11 @@ function handleInput():void
     if (keyPressed["KeyS"] == true) { 
         commandsList.push(new CommandPlayerMoveDown(player));
     }
+}
+
+function sendToserver(command: Command): void
+{
+
 }
 
 function update(context: CanvasRenderingContext2D): void
